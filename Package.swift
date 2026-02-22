@@ -10,7 +10,8 @@ import AppleProductTypes
 let package = Package(
     name: "My App",
     platforms: [
-        .iOS("18.1")
+        .iOS("18.1"),
+        .macOS(.v11)
     ],
     products: [
         .iOSApplication(
@@ -32,9 +33,16 @@ let package = Package(
             ]
         )
     ],
+    dependencies: [
+            .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "11.0.0")
+        ],
     targets: [
         .executableTarget(
             name: "AppModule",
+            dependencies: [
+                            .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
+                            .product(name: "FirebaseAuth", package: "firebase-ios-sdk")
+                        ],
             path: ".",
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals")
