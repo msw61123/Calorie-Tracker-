@@ -7,7 +7,6 @@
 import SwiftUI
 
 struct CreateAccountView: View {
-    
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
@@ -16,7 +15,6 @@ struct CreateAccountView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            
             Text("Create Account")
                 .font(.title)
                 .bold()

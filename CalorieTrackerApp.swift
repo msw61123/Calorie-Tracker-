@@ -10,8 +10,8 @@ import FirebaseCore
 
 @main
 struct CalorieTrackerApp: App {
-    
     @StateObject private var authVM = AuthViewModel()
+    @AppStorage("didCompleteQuestionnaire") private var didCompleteQuestionnaire = false
     
     init() {
         FirebaseApp.configure()
@@ -19,8 +19,16 @@ struct CalorieTrackerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LoginView()
-                .environmentObject(authVM)
+            if authVM.user == nil {
+                LoginView()
+                    .environmentObject(authVM)
+            } else if !didCompleteQuestionnaire {
+                QuestionnaireView()
+                    .environmentObject(authVM)
+            } else {
+                HomeView()
+                    .environmentObject(authVM)
+            }
         }
     }
 }

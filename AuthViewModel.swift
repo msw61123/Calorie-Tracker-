@@ -62,6 +62,9 @@ final class AuthViewModel: ObservableObject {
             try Auth.auth().signOut()
             user = nil
             message = "Signed out."
+            
+            UserDefaults.standard.set(false, forKey: "didCompleteQuestionnaire")
+            
         } catch {
             message = error.localizedDescription
         }
