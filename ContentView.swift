@@ -4,85 +4,108 @@ import SwiftUI
 struct MyApp: App {
     var body: some Scene {
         WindowGroup {
-            QuestionnaireView()
+            CalorieView()
         }
     }
 }
 
-struct QuestionnaireView: View {
+// MARK: - Model
+struct Meal: Identifiable {
+    let id = UUID()
+    let name: String
+    let calories: Int
+}
+
+// MARK: - Main Screen
+struct CalorieView: View {
     
-    @State private var step = 0
+    @State private var breakfast: [Meal] = [
+        Meal(name: "Eggs", calories: 200)
+    ]
     
-    @State private var age = ""
-    @State private var height = ""
-    @State private var weight = ""
-    @State private var goal = "Maintain Weight"
+    @State private var lunch: [Meal] = []
+    @State private var dinner: [Meal] = []
     
-    let goals = ["Lose Weight", "Maintain Weight", "Gain Muscle"]
+    let goal = 2000
+    
+    var totalCalories: Int {
+        (breakfast + lunch + dinner).reduce(0) { $0 + $1.calories }
+    }
     
     var body: some View {
-        VStack(spacing: 30) {
-            
-            if step == 0 {
-                Text("How old are you?")
-                    .font(.title)
+        ScrollView {
+            VStack(spacing: 30) {
                 
-                TextField("Age", text: $age)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
-            }
-            
-            if step == 1 {
-                Text("What is your height?")
-                    .font(.title)
-                
-                TextField("Height (cm)", text: $height)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
-            }
-            
-            if step == 2 {
-                Text("What is your weight?")
-                    .font(.title)
-                
-                TextField("Weight (kg)", text: $weight)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
-            }
-            
-            if step == 3 {
-                Text("What is your fitness goal?")
-                    .font(.title)
-                
-                Picker("Goal", selection: $goal) {
-                    ForEach(goals, id: \.self) { g in
-                        Text(g)
+                // 🔴 Calorie Ring
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 20)
+                    
+                    Circle()
+                        .trim(from: 0, to: min(Double(totalCalories) / Double(goal), 1))
+                        .stroke(Color.red, style: StrokeStyle(lineWidth: 20, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    
+                    VStack {
+                        Text("\(totalCalories)")
+                            .font(.largeTitle)
+                            .bold()
+                        
+                        Text("of \(goal) cal")
+                            .foregroundColor(.gray)
                     }
                 }
-                .pickerStyle(.wheel)
-                .padding()
-            }
-            
-            Button(step == 3 ? "Finish" : "Next") {
-                if step < 3 {
-                    step += 1
-                } else {
-                    print("Age:", age)
-                    print("Height:", height)
-                    print("Weight:", weight)
-                    print("Goal:", goal)
-                }
+                .frame(width: 180, height: 180)
+                
+                // Meal Sections
+                MealSection(title: "Breakfast", meals: breakfast)
+                MealSection(title: "Lunch", meals: lunch)
+                MealSection(title: "Dinner", meals: dinner)
             }
             .padding()
+        }
+    }
+}
+
+// MARK: - Section UI
+struct MealSection: View {
+    
+    var title: String
+    var meals: [Meal]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            
+            Text(title)
+                .font(.title2)
+                .bold()
+            
+            if meals.isEmpty {
+                Text("No meals yet")
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+            } else {
+                ForEach(meals) { meal in
+                    HStack {
+                        Text(meal.name)
+                        Spacer()
+                        Text("\(meal.calories) cal")
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal)
+                }
+            }
+            
+            Button("+ Add Meal") {
+                print("Add meal tapped for \(title)")
+            }
             .frame(maxWidth: .infinity)
-            .background(Color.blue)
-            .foregroundColor(.white)
+            .padding()
+            .background(Color.blue.opacity(0.1))
             .cornerRadius(10)
-            .padding(.horizontal)
         }
         .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
     }
 }
