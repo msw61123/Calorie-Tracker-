@@ -6,24 +6,29 @@
 //
 import SwiftUI
 import FirebaseAuth
-
 struct HomeView: View {
     
     @EnvironmentObject var authVM: AuthViewModel
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Home")
-                .font(.largeTitle)
-                .bold()
-            
-            Text(authVM.user?.email ?? "No user email")
-            
-            Button("Sign Out") {
-                authVM.signOut()
+        NavigationStack {
+            VStack(spacing: 20) {
+                
+                if let email = authVM.user?.email {
+                    Text("Welcome, \(email)")
+                        .font(.headline)
+                }
+                
+                CalorieView()
+                
+                Button("Sign Out") {
+                    authVM.signOut()
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.top)
             }
-            .buttonStyle(.borderedProminent)
+            .padding()
         }
-        .padding()
     }
 }
+
