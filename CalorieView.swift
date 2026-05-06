@@ -6,17 +6,21 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 struct Meal: Identifiable, Codable, Equatable {
     let id: UUID
     let name: String
     let calories: Int
-    init(name: String, calories: Int) {
+    let servingText: String
+    init(name: String, calories: Int, servingText: String = "1 serving") {
         self.id = UUID()
         self.name = name
         self.calories = calories
+        self.servingText = servingText
     }
 }
 struct CalorieView: View {
+    @EnvironmentObject var authVM: AuthViewModel
     @AppStorage("savedAge") private var age = 25
     @AppStorage("savedHeightFeet") private var heightFeet = 5
     @AppStorage("savedHeightInches") private var heightInches = 8
@@ -44,7 +48,8 @@ struct CalorieView: View {
     var todayKey: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        return "meals_" + formatter.string(from: Date())
+        let userID = authVM.user?.uid ?? "guest"
+        return "meals_\(userID)_\(formatter.string(from: Date()))" 
     }
     func saveMeals() {
         let allMeals = [
@@ -127,14 +132,19 @@ struct CalorieView: View {
     }
 }
 struct MealSection: View {
+
     var title: String
     @Binding var meals: [Meal]
+
     @State private var showFoodSearch = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+
             Text(title)
                 .font(.title2)
                 .bold()
+
             if meals.isEmpty {
                 Text("No meals yet")
                     .foregroundColor(.gray)
@@ -142,14 +152,23 @@ struct MealSection: View {
             } else {
                 ForEach(meals) { meal in
                     HStack {
-                        Text(meal.name)
+                        VStack(alignment: .leading) {
+                            Text(meal.name)
+                            
+                            Text(meal.servingText)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+
                         Spacer()
+
                         Text("\(meal.calories) cal")
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal)
                 }
             }
+
             Button("+ Add Meal") {
                 showFoodSearch = true
             }
@@ -157,15 +176,15 @@ struct MealSection: View {
             .padding()
             .background(Color.blue.opacity(0.1))
             .cornerRadius(10)
-            .sheet(isPresented: $showFoodSearch) {
-                NavigationStack {
-                    FoodSearchView(meals: $meals)
-                }
-            }
         }
         .padding()
         .background(Color.gray.opacity(0.1))
         .cornerRadius(12)
+        .sheet(isPresented: $showFoodSearch) {
+            NavigationStack {
+                FoodSearchView(meals: $meals)
+            }
+        }
     }
 }
 
